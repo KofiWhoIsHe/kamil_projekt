@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -17,7 +18,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
 const schema = z.object({
   email: z.string().min(1, "Podaj adres e-mail").email("Niepoprawny adres e-mail"),
   password: z.string().min(1, "Podaj hasło"),
@@ -25,6 +25,15 @@ const schema = z.object({
 
 export default function LoginPage() {
   const router = useRouter();
+
+  useEffect(() => {
+    if (pb.authStore.isValid) {
+      router.push(
+        pb.authStore.record?.role === "technician" ? "/technician" : "/dashboard"
+      );
+    }
+  }, [router]);
+
   const {
     register,
     handleSubmit,
@@ -37,7 +46,7 @@ export default function LoginPage() {
         .collection("users")
         .authWithPassword(values.email, values.password);
       toast.success("Zalogowano");
-      router.push(auth.record.role === "technician" ? "/technician" : "/tickets");
+      router.push(auth.record.role === "technician" ? "/technician" : "/dashboard");
     } catch {
       toast.error("Nieprawidłowy e-mail lub hasło");
     }
